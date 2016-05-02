@@ -103,11 +103,11 @@ $(FLAGOBJ64): $(FLAGSRC) $(HEADER) Makefile
 
 bin/monitor-x86.dll: bin/monitor.c $(SRCOBJ32) $(HOOKOBJ32) $(FLAGOBJ32) \
 		$(BSONOBJ32) $(LIBCAPSTONE32) $(SHA1OBJ32)
-	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
+	$(CC32) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS) -Wunused-variable
 
 bin/monitor-x64.dll: bin/monitor.c $(SRCOBJ64) $(HOOKOBJ64) $(FLAGOBJ64) \
 		$(BSONOBJ64) $(LIBCAPSTONE64) $(SHA1OBJ64)
-	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS)
+	$(CC64) -shared -o $@ $^ $(CFLAGS) $(LDFLAGS) -Wunused-variable
 
 bin/inject-x86.exe: bin/inject.c src/assembly.c
 	$(CC32) -o $@ $^ $(CFLAGS) $(LDFLAGS) -I inc

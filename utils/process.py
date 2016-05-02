@@ -218,6 +218,7 @@ class SignatureProcessor(object):
 
     def _parse_logging(self, text):
         ret = []
+        fxxx.write(text)
         for line in text.split('\n'):
             if line.startswith('*'):
                 line = line[1:].strip()
@@ -226,6 +227,11 @@ class SignatureProcessor(object):
             ret.append(dict(argtype=argtype,
                             argname=argname,
                             argvalue=argvalue))
+
+        ret.append(dict(argtype='p', argname='CALLER ADDRESS - NECST', argvalue='ADCALL'))
+        fxxx.write('\n\n__________________________________\n\n')
+        
+        
         return ret
 
     def _parse_post(self, text):
@@ -563,6 +569,7 @@ class FlagsProcessor(object):
         dp.render('flags-header', self.flags_h, flags=self.flags)
 
 if __name__ == '__main__':
+    fxxx = open("/tmp/txt", 'w')
     parser = argparse.ArgumentParser()
     parser.add_argument('action', type=str, help='Action to perform.')
     parser.add_argument('data_directory', type=str, nargs='?', default='data/', help='Path to data directory.')
@@ -597,3 +604,4 @@ if __name__ == '__main__':
         dp.list_apis()
     else:
         sys.exit('Invalid action: %r' % args.action)
+    fxxx.close()
