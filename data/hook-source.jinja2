@@ -110,6 +110,7 @@ static {{ hook.signature.return_value }} ({{ hook.signature.calling_convention }
 {%- endfor %}
 ) {
 	int * ADCALL = (int*)GetCallerAddress();
+	
     last_error_t lasterror;
     get_last_error(&lasterror);
     log_debug("Entered %s\n", "{{ hook.apiname }}");

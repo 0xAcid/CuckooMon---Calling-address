@@ -86,15 +86,50 @@ static __inline__ int *  FixCall(int * Ptr)
 #ifdef __amd64__
 static __inline__ PEB *get_PEB()
 {
-	return NULL;
+	void *PPEB;
+	//__asm__ __volatile__("mov %%gs:0x30, %0;":"=r"(PPEB));
+	
+
+__asm__ __volatile__("mov %%gs:0x30, %%rax;"
+	"mov 0x60(%%rax), %%rax;"
+	"mov %%rax, %0":"=r"(PPEB) 
+
+	
+	);
+
+	return PPEB;
 }
 
 
 static __inline__ int *  FixCall(int * Ptr)
 {
-	return NULL;
+	// Call seems to begin either by FF or E8 
+	int i = 2;
+	// Call is at least 2 bytes. (Up to 6 bytes from what i have seen in x86)
+	// It starts with one of the following : 0xFF ; 0xE8 ; 0x9A
+	Ptr = ((int)Ptr) -2;
+	while (i <=6)
+	{
+		if ((*Ptr&0xff) == 0xFF)
+		{
+			break;
+		}
+		else if((*Ptr&0xff) == 0xE8) 
+		{
+			break;
+		}
+		else if((*Ptr&0xff) == 0x9A)
+		{
+			break;
+		}
+		else
+		{
+			Ptr = ((int)Ptr) -1;
+			i++;
+		}
+	}
+	return (int *)Ptr;
 }
-
 
 
 
@@ -113,6 +148,7 @@ static __inline__ int *  FixCall(int * Ptr)
 static __inline__ unsigned int IsInTextRange(int * Addr)
 {
 	PPEB PEB = get_PEB();
+	
 	PLDR_MODULE Module = (PLDR_MODULE) PEB->LoaderData->InLoadOrderModuleList.Flink;
 	if ((void*)Addr - Module->BaseAddress < Module->SizeOfImage){
 		return 1;
@@ -140,7 +176,8 @@ static __inline__ int * GetCallerAddress()
 {
 	int *Caller = NULL;
 	int i =1;
-	Caller = (void *)__builtin_return_address(0) -5; // Get return address minus 5 so we get the address where the function is called.
+	
+	Caller = (void *)__builtin_return_address(0); // Get return address minus 5 so we get the address where the function is called.
 	
 	// TODO : Fix depends on architecture
 	//__asm__ __volatile__("movl 4(%%ebp),%0;"
@@ -149,6 +186,7 @@ static __inline__ int * GetCallerAddress()
 	{
 		return FixCall(Caller);
 	}	
+
 	while(check_caller_address_in_module(Caller) && i <= 10){
     switch(i){
       case 1:
@@ -186,6 +224,7 @@ static __inline__ int * GetCallerAddress()
     }
     ++i;
   }
+  
   if (check_caller_address_in_module(Caller))
 	{
 		return NULL;
@@ -194,7 +233,7 @@ static __inline__ int * GetCallerAddress()
   {
 	  return NULL;
   }
-	return  FixCall(Caller);;
+	return FixCall(Caller);
 }
 
 
